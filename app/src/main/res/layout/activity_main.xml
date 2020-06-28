@@ -33,6 +33,12 @@
             android:layout_height="match_parent"
             android:text="添加水印" />
 
+        <Button
+            android:id="@+id/activityMainPaintBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="绘制图形" />
+
     </LinearLayout>
 
     <com.dididi.watermarkmaster.WatermarkView

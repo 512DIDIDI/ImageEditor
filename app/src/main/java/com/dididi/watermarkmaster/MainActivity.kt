@@ -9,10 +9,12 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.PersistableBundle
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
@@ -20,10 +22,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import java.lang.reflect.Proxy
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
+@Suppress("SameParameterValue")
 class MainActivity : AppCompatActivity() {
 
     companion object {
@@ -42,6 +42,10 @@ class MainActivity : AppCompatActivity() {
             applyWritePermission(OPEN_ALBUM) {
                 openAlbum()
             }
+        }
+        activityMainPaintBtn.setOnClickListener {
+            if (activityMainWatermarkView.backgroundImage != null)
+                activityMainWatermarkView.isPainting = !activityMainWatermarkView.isPainting
         }
     }
 
