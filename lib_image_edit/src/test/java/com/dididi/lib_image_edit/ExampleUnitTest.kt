@@ -1,4 +1,4 @@
-package com.dididi.watermarkmaster
+package com.dididi.lib_image_edit
 
 import org.junit.Test
 

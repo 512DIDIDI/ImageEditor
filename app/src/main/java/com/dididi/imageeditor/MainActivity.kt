@@ -1,4 +1,4 @@
-package com.dididi.watermarkmaster
+package com.dididi.imageeditor
 
 import android.Manifest
 import android.annotation.TargetApi
@@ -9,17 +9,16 @@ import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.os.PersistableBundle
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.dididi.lib_image_edit.view.BackgroundImageView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
@@ -33,19 +32,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        activityMainWatermarkView.textColor = Color.GREEN
-        activityMainAddWatermark.setOnClickListener {
-            if (activityMainWatermarkView.backgroundImage != null)
-                activityMainWatermarkView.watermarkText = activityMainWatermarkEt.text.toString()
-        }
         activityMainChooseImageBtn.setOnClickListener {
             applyWritePermission(OPEN_ALBUM) {
                 openAlbum()
             }
-        }
-        activityMainPaintBtn.setOnClickListener {
-            if (activityMainWatermarkView.backgroundImage != null)
-                activityMainWatermarkView.isPainting = !activityMainWatermarkView.isPainting
         }
     }
 
@@ -66,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == OPEN_ALBUM) {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                activityMainWatermarkView.backgroundImage = getImagePath(data)
+                activityMainBackgroundImage.setImageBitmap(getImagePath(data))
             }
         }
     }
@@ -108,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         val imagePath = handleImageAfterKitKat(data)
         val oriUri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             //7.0适配(此处的authority为${applicationId}.provider)
-            FileProvider.getUriForFile(this, "com.dididi.watermarkmaster.provider", File(imagePath))
+            FileProvider.getUriForFile(this, "${BuildConfig.APPLICATION_ID}.provider", File(imagePath))
         } else {
             Uri.parse(imagePath)
         }

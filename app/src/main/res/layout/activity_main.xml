@@ -41,8 +41,8 @@
 
     </LinearLayout>
 
-    <com.dididi.watermarkmaster.WatermarkView
-        android:id="@+id/activityMainWatermarkView"
+    <com.dididi.lib_image_edit.view.BackgroundImageView
+        android:id="@+id/activityMainBackgroundImage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/activityMainBottomBar"

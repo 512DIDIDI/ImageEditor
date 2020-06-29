@@ -1,4 +1,4 @@
-package com.dididi.watermarkmaster
+package com.dididi.lib_image_edit.view
 
 import android.annotation.SuppressLint
 import android.content.Context

@@ -1,2 +1,3 @@
+include ':lib_image_edit'
 include ':app'
-rootProject.name = "WatermarkMaster"
+rootProject.name = "ImageEditor"
