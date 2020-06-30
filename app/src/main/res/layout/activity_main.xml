@@ -39,9 +39,27 @@
             android:layout_height="match_parent"
             android:text="绘制图形" />
 
+        <Button
+            android:id="@+id/activityMainEraserBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="橡皮擦"/>
+
+        <Button
+            android:id="@+id/activityMainUndoBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="撤销"/>
+
+        <Button
+            android:id="@+id/activityMainRedoBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="前进"/>
+
     </LinearLayout>
 
-    <com.dididi.lib_image_edit.view.BackgroundImageView
+    <com.dididi.lib_image_edit.view.ImageEditView
         android:id="@+id/activityMainBackgroundImage"
         android:layout_width="match_parent"
         android:layout_height="0dp"

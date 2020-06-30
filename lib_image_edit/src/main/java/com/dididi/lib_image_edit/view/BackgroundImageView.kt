@@ -24,7 +24,7 @@ import kotlin.math.min
 /**
  * @author dididi(yechao)
  * @since 29/06/2020
- * @describe 背景图片
+ * @describe 背景图片，实现了拖拽移动，和多指缩放等操作
  */
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -175,7 +175,7 @@ class BackgroundImageView : AppCompatImageView {
         onImageChangeListener?.invoke(getBitmap())
     }
 
-    fun getBitmap() = if (drawable == null) {
+    fun getBitmap() = if (drawable != null) {
         (drawable as BitmapDrawable).bitmap
     } else {
         null

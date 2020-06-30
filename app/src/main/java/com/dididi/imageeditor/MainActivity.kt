@@ -8,17 +8,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.dididi.lib_image_edit.view.BackgroundImageView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
@@ -36,6 +35,21 @@ class MainActivity : AppCompatActivity() {
             applyWritePermission(OPEN_ALBUM) {
                 openAlbum()
             }
+        }
+        activityMainPaintBtn.setOnClickListener {
+            activityMainBackgroundImage.brushDrawingView.paintMode =
+                !activityMainBackgroundImage.brushDrawingView.paintMode
+            activityMainBackgroundImage.brushDrawingView.visibility = View.VISIBLE
+        }
+        activityMainEraserBtn.setOnClickListener {
+            activityMainBackgroundImage.brushDrawingView.eraserMode =
+                !activityMainBackgroundImage.brushDrawingView.eraserMode
+        }
+        activityMainUndoBtn.setOnClickListener {
+            activityMainBackgroundImage.brushDrawingView.undo()
+        }
+        activityMainRedoBtn.setOnClickListener {
+            activityMainBackgroundImage.brushDrawingView.redo()
         }
     }
 
@@ -56,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == OPEN_ALBUM) {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                activityMainBackgroundImage.setImageBitmap(getImagePath(data))
+                activityMainBackgroundImage.backgroundImageView.setImageBitmap(getImagePath(data))
             }
         }
     }

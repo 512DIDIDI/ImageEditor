@@ -1,7 +1,5 @@
 package com.dididi.lib_image_edit.controller
 
-import com.dididi.lib_image_edit.view.BackgroundImageView
-
 
 /**
  * @author dididi(yechao)
@@ -9,5 +7,6 @@ import com.dididi.lib_image_edit.view.BackgroundImageView
  * @describe 图片编辑controller层 提供外部通用接口
  */
 
+@Suppress("unused")
 class ImageEditor {
 }
