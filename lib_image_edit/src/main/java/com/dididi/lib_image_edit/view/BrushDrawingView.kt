@@ -16,7 +16,7 @@ import kotlin.math.abs
  * @describe 画笔/橡皮擦 view 在[BackgroundImageView]之上，其他[CustomView]之下
  */
 
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 class BrushDrawingView : View {
 
     companion object {
@@ -129,6 +129,8 @@ class BrushDrawingView : View {
         super.onDetachedFromWindow()
         mDrawnPaths.clear()
         mRedoPaths.clear()
+        paintMode = false
+        eraserMode = false
     }
 
     /**

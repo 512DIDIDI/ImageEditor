@@ -50,7 +50,7 @@ class ImageEditView : RelativeLayout {
         private set
 
     /**自定义View*/
-    var customViews: MutableList<CustomView>? = null
+    var customViews = mutableListOf<CustomView>()
 
     /**图片滤镜*/
     lateinit var imageFilterView: ImageFilterView
@@ -103,8 +103,8 @@ class ImageEditView : RelativeLayout {
             addView(this, viewParams)
         }
         //3.添加自定义view
-        customViews?.apply {
-            if (!isEmpty()) {
+        customViews.apply {
+            if (isNotEmpty()) {
                 forEach {
                     it.id = it.setViewId()
                     it.visibility = GONE

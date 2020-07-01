@@ -9,7 +9,7 @@ import android.widget.RelativeLayout
 /**
  * @author dididi(yechao)
  * @since 30/06/2020
- * @describe 自定义View ，可根据需求拓展图片编辑功能
+ * @describe 自定义View ，可根据需求拓展图片编辑功能，
  */
 
 abstract class CustomView :View{
