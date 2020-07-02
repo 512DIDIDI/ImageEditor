@@ -18,6 +18,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import com.dididi.lib_image_edit.controller.ImageEditor
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 
@@ -26,6 +27,11 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         const val OPEN_ALBUM = 1
+    }
+
+    private val imageEditor:ImageEditor by lazy {
+        ImageEditor.Builder(this,findViewById(R.id.activityMainBackgroundImage))
+            .build()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,19 +43,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
         activityMainPaintBtn.setOnClickListener {
-            activityMainBackgroundImage.brushDrawingView.paintMode =
-                !activityMainBackgroundImage.brushDrawingView.paintMode
-            activityMainBackgroundImage.brushDrawingView.visibility = View.VISIBLE
+            imageEditor.changePaintMode()
         }
         activityMainEraserBtn.setOnClickListener {
-            activityMainBackgroundImage.brushDrawingView.eraserMode =
-                !activityMainBackgroundImage.brushDrawingView.eraserMode
+            imageEditor.changeEraserMode()
         }
         activityMainUndoBtn.setOnClickListener {
-            activityMainBackgroundImage.brushDrawingView.undo()
+            imageEditor.undo()
         }
         activityMainRedoBtn.setOnClickListener {
-            activityMainBackgroundImage.brushDrawingView.redo()
+            imageEditor.redo()
         }
     }
 
@@ -70,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == OPEN_ALBUM) {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                activityMainBackgroundImage.backgroundImageView.setImageBitmap(getImagePath(data))
+                imageEditor.backgroundImageView.setImageBitmap(getImagePath(data))
             }
         }
     }

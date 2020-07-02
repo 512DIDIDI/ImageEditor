@@ -20,7 +20,22 @@ import kotlin.math.abs
 class BrushDrawingView : View {
 
     companion object {
+        /**绘制触发阈值*/
         const val TOUCH_TOLERANCE = 4f
+    }
+
+    /**
+     * 绘画动作监听
+     */
+    interface OnBrushDrawingListener{
+        /**添加绘画路径*/
+        fun addView()
+        /**移除绘画路径*/
+        fun removeView()
+        /**开始绘画*/
+        fun startDrawing()
+        /**停止绘画*/
+        fun stopDrawing()
     }
 
     constructor(context: Context) : this(context, null)
@@ -31,44 +46,39 @@ class BrushDrawingView : View {
         defStyleAttr
     )
 
-    init {
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
-    }
-
     private var mPaintPath = Path()
-    private val mPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
-        strokeJoin = Paint.Join.ROUND
-        color = Color.BLACK
-        strokeWidth = 20f
-    }
+    private val mPaint = Paint()
     private val paintXfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_OVER)
     private val eraserXfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
 
+    init {
+        resetPaint()
+    }
+
+    internal var brushDrawingListener:OnBrushDrawingListener? = null
     /**绘制画笔的颜色*/
-    var paintColor = Color.BLACK
+    internal var paintColor = Color.BLACK
         set(value) {
             field = value
             mPaint.color = value
         }
 
     /**画笔粗细*/
-    var paintWidth = 20f
+    internal var paintWidth = 20f
         set(value) {
             field = value
             mPaint.strokeWidth = value
         }
 
     /**是否是绘制模式*/
-    var paintMode = false
+    internal var paintMode = false
         set(value) {
             field = value
             mPaint.xfermode = if (value) paintXfermode else null
         }
 
     /**是否是橡皮擦模式*/
-    var eraserMode = false
+    internal var eraserMode = false
         set(value) {
             field = value
             paintMode = value
@@ -143,6 +153,7 @@ class BrushDrawingView : View {
         mPaintPath.moveTo(event.x, event.y)
         mCurrentX = event.x
         mCurrentY = event.y
+        brushDrawingListener?.startDrawing()
     }
 
     /**
@@ -170,12 +181,26 @@ class BrushDrawingView : View {
     private fun touchUp() {
         mDrawnPaths.push(PathPaint(mPaintPath, mPaint))
         mPaintPath = Path()
+        brushDrawingListener?.stopDrawing()
+        brushDrawingListener?.addView()
+    }
+
+    /**重置画笔*/
+    internal fun resetPaint(){
+        setLayerType(LAYER_TYPE_SOFTWARE,null)
+        mPaint.apply {
+            style = Paint.Style.STROKE
+            strokeCap = Paint.Cap.ROUND
+            strokeJoin = Paint.Join.ROUND
+            color = Color.BLACK
+            strokeWidth = 20f
+        }
     }
 
     /**
      * 清除画布
      */
-    fun clearAll() {
+    internal fun clearAll() {
         mDrawnPaths.clear()
         mRedoPaths.clear()
         invalidate()
@@ -184,27 +209,29 @@ class BrushDrawingView : View {
     /**
      * 撤销上一步画笔
      */
-    fun undo() {
+    internal fun undo() {
         if (mDrawnPaths.isNotEmpty()) {
             mRedoPaths.push(mDrawnPaths.pop())
             invalidate()
+            brushDrawingListener?.removeView()
         }
     }
 
     /**
      * redo撤销的历史记录
      */
-    fun redo() {
+    internal fun redo() {
         if (mRedoPaths.isNotEmpty()) {
             mDrawnPaths.push(mRedoPaths.pop())
             invalidate()
+            brushDrawingListener?.addView()
         }
     }
 
     /**
      * 获取path和paint的实例，避免配置污染历史记录
      */
-    class PathPaint(path: Path, paint: Paint) {
+    private class PathPaint(path: Path, paint: Paint) {
         //注意必须创建新的path与paint实例，不能直接使用引用
         var path = Path(path)
             private set

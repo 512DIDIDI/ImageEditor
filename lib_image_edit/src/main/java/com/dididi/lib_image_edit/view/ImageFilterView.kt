@@ -17,7 +17,7 @@ class ImageFilterView :GLSurfaceView {
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : super(context,attrs)
 
-    fun setFilterEffect(){}
+    internal fun setFilterEffect(){}
 
-    fun setSourceBitmap(src:Bitmap?){}
+    internal fun setSourceBitmap(src:Bitmap?){}
 }

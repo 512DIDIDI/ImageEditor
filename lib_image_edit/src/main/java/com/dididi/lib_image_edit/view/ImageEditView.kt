@@ -42,18 +42,18 @@ class ImageEditView : RelativeLayout {
     }
 
     /**背景图片*/
-    lateinit var backgroundImageView: BackgroundImageView
+    internal lateinit var backgroundImageView: BackgroundImageView
         private set
 
     /**画笔*/
-    lateinit var brushDrawingView: BrushDrawingView
+    internal lateinit var brushDrawingView: BrushDrawingView
         private set
 
     /**自定义View*/
-    var customViews = mutableListOf<CustomView>()
+    internal var customViews = mutableListOf<CustomView>()
 
     /**图片滤镜*/
-    lateinit var imageFilterView: ImageFilterView
+    internal lateinit var imageFilterView: ImageFilterView
         private set
 
     /**初始位置*/
