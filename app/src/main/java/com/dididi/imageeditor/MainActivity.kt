@@ -1,7 +1,6 @@
 package com.dididi.imageeditor
 
 import android.Manifest
-import android.annotation.TargetApi
 import android.app.Activity
 import android.content.ContentUris
 import android.content.Intent
@@ -14,7 +13,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -41,6 +39,9 @@ class MainActivity : AppCompatActivity() {
             applyWritePermission(OPEN_ALBUM) {
                 openAlbum()
             }
+        }
+        activityMainAddWatermark.setOnClickListener {
+            imageEditor.setText(activityMainWatermarkEt.text.toString())
         }
         activityMainPaintBtn.setOnClickListener {
             imageEditor.changePaintMode()
@@ -123,10 +124,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    /**
-     * android4.4之后，需要解析获取图片真实路径
-     */
-    @TargetApi(Build.VERSION_CODES.KITKAT)
     private fun handleImageAfterKitKat(data: Intent): String {
         val uri = data.data
         var imagePath = ""
@@ -177,14 +174,6 @@ class MainActivity : AppCompatActivity() {
                 imagePath = uri!!.path!!
         }
         return imagePath
-    }
-
-    /**
-     * android4.4之前可直接获取图片真实uri
-     */
-    private fun handleImageBeforeKitKat(data: Intent): String {
-        val uri = data.data
-        return getImagePath(uri!!, null, null)!!
     }
 
     /**

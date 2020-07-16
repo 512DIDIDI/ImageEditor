@@ -26,9 +26,11 @@ import kotlin.math.min
 class ImageEditView : RelativeLayout {
 
     companion object {
+        //布局id
         const val BACKGROUND_IMAGE_ID = 1
         const val BRUSH_ID = 2
-        const val IMAGE_FILTER_ID = 3
+        const val TEXT_ID = 3
+        const val IMAGE_FILTER_ID = 4
     }
 
     constructor(context: Context) : this(context, null)
@@ -47,6 +49,9 @@ class ImageEditView : RelativeLayout {
 
     /**画笔*/
     internal lateinit var brushDrawingView: BrushDrawingView
+        private set
+
+    internal lateinit var outlineTextView: OutlineTextView
         private set
 
     /**自定义View*/
@@ -77,8 +82,9 @@ class ImageEditView : RelativeLayout {
             val backgroundParam = LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            backgroundParam.addRule(CENTER_IN_PARENT, TRUE)
+            ).apply {
+                addRule(CENTER_IN_PARENT, TRUE)
+            }
             //读取xml中的image_src
             attrs?.also {
                 val typedArray = context.obtainStyledAttributes(it, R.styleable.ImageEditView)
@@ -102,7 +108,18 @@ class ImageEditView : RelativeLayout {
             visibility = GONE
             addView(this, viewParams)
         }
-        //3.添加自定义view
+        //3.添加文本
+        outlineTextView = OutlineTextView(context).apply {
+            id = TEXT_ID
+            visibility = GONE
+            val textParams =
+                LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
+                    it.addRule(CENTER_IN_PARENT, TRUE)
+                }
+            setPadding(20, 20, 20, 20)
+            addView(this, textParams)
+        }
+        //4.添加自定义view
         customViews.apply {
             if (isNotEmpty()) {
                 forEach {
@@ -112,7 +129,7 @@ class ImageEditView : RelativeLayout {
                 }
             }
         }
-        //4.增加滤镜
+        //5.增加滤镜
         imageFilterView = ImageFilterView(context).apply {
             id = IMAGE_FILTER_ID
             visibility = GONE

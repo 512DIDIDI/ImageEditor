@@ -20,6 +20,7 @@ class ImageEditor private constructor(builder: Builder) {
         internal var parentView = imageEditView
         internal var brushDrawingView = imageEditView.brushDrawingView
         internal var backgroundImageView = imageEditView.backgroundImageView
+        internal var addTextView = imageEditView.outlineTextView
         internal var customViews = imageEditView.customViews
 
         /**
@@ -33,14 +34,14 @@ class ImageEditor private constructor(builder: Builder) {
             return this
         }
 
-            /**
-             * 增加单个自定义view
-             */
-            fun addCustomView(view: CustomView): Builder {
-                customViews.add(view)
-                imageEditView.customViews.add(view)
-                return this
-            }
+        /**
+         * 增加单个自定义view
+         */
+        fun addCustomView(view: CustomView): Builder {
+            customViews.add(view)
+            imageEditView.customViews.add(view)
+            return this
+        }
 
         fun build() = ImageEditor(this)
     }
@@ -51,6 +52,7 @@ class ImageEditor private constructor(builder: Builder) {
     private val mCustomViews = builder.customViews
     private val mAddViews = mutableListOf<View>()
     private val mRedoViews = mutableListOf<View>()
+    private val mTextView = builder.addTextView
 
 
     fun changePaintMode() {
@@ -63,10 +65,13 @@ class ImageEditor private constructor(builder: Builder) {
         mBrushDrawingView.visibility = View.VISIBLE
     }
 
+    fun setText(text:CharSequence){
+        mTextView.text = text
+    }
+
     fun undo() {
         mBrushDrawingView.undo()
     }
-
 
     fun redo() {
         mBrushDrawingView.redo()

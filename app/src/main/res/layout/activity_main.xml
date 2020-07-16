@@ -6,6 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
+    <com.dididi.lib_image_edit.view.ImageEditView
+        android:id="@+id/activityMainBackgroundImage"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/activityMainBottomBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:id="@+id/activityMainBottomBar"
         android:layout_width="match_parent"
@@ -25,7 +43,7 @@
             android:id="@+id/activityMainChooseImageBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="选择图片" />
+            android:text="@string/choose_image" />
 
         <Button
             android:id="@+id/activityMainAddWatermark"
@@ -58,13 +76,4 @@
             android:text="前进"/>
 
     </LinearLayout>
-
-    <com.dididi.lib_image_edit.view.ImageEditView
-        android:id="@+id/activityMainBackgroundImage"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/activityMainBottomBar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
