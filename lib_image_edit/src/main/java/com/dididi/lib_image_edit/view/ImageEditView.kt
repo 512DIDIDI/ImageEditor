@@ -5,8 +5,10 @@ import android.content.Context
 import android.graphics.Canvas
 import android.renderscript.Float2
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
+import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
 import android.widget.Toast
@@ -51,8 +53,15 @@ class ImageEditView : RelativeLayout {
     internal lateinit var brushDrawingView: BrushDrawingView
         private set
 
+    /**带有轮廓的水印文字*/
     internal lateinit var outlineTextView: OutlineTextView
         private set
+
+    /**水印文字的宽度覆盖范围*/
+    private var outlineTvWidthRange = 0f..0f
+
+    /**水印文字的高度覆盖范围*/
+    private var outlineTvHeightRange = 0f..0f
 
     /**自定义View*/
     internal var customViews = mutableListOf<CustomView>()
@@ -67,11 +76,14 @@ class ImageEditView : RelativeLayout {
     /**位移量*/
     private var mTranslatePoint: Float2 = Float2()
 
-    /**缩放倍数*/
-    private var mScaleFactor = 1f
-
     /**是否正在执行缩放操作*/
     private var isScaling = false
+
+    /**
+     * 平移或缩放时获取到焦点的控件
+     * [onTouchEvent]
+     */
+    private var focusView: View = this
 
     private fun initView(attrs: AttributeSet?) {
         //1.初始化背景图片并添加
@@ -143,7 +155,7 @@ class ImageEditView : RelativeLayout {
     }
 
     override fun dispatchDraw(canvas: Canvas?) {
-        //裁剪画布
+        //裁剪画布到背景图大小，可以避免涂鸦时画出背景外的bug
         backgroundImageView.getBitmap()?.let {
             canvas?.clipRect(
                 (width - it.width) / 2f,
@@ -155,30 +167,79 @@ class ImageEditView : RelativeLayout {
         super.dispatchDraw(canvas)
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        //如果不处于绘制等模式时，拦截touch事件，不让子类消费
-        if (!brushDrawingView.paintMode){
-            return true
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        //如果处于绘制模式或者触摸到文字水印等区域内时，分发事件让子类处理
+        if (brushDrawingView.paintMode) {
+            return super.onInterceptTouchEvent(ev)
         }
-        return super.onInterceptTouchEvent(ev)
+        return true
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        //缩放操作由ScaleDetector处理
-        mScaleDetector.onTouchEvent(event)
-        //移动背景图片
-        translationBackground(event)
-        return true
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        outlineTvWidthRange = outlineTextView.left.toFloat()..outlineTextView.right.toFloat()
+        outlineTvHeightRange = outlineTextView.top.toFloat()..outlineTextView.bottom.toFloat()
+        return if (onInterceptTouchEvent(event)) {
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                //只有在每次手指按下时，才会重新赋值focusView。
+                focusView = when {
+                    //水印框覆盖范围内，焦点控件为水印控件
+                    event.x in outlineTvWidthRange && event.y in outlineTvHeightRange -> {
+                        outlineTextView
+                    }
+                    else -> this
+                }
+            }
+            //缩放操作由ScaleDetector处理
+            mScaleDetector.onTouchEvent(event)
+            //移动背景图片
+            translationBackground(event)
+            true
+        } else {
+            false
+        }
     }
+
 
     /**
      * 多指操作缩放
      */
     private val mScaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
+        /**多指之间的x距离*/
+        private var lastSpanX = 0f
+
+        /**多指之间的y距离*/
+        private var lastSpanY = 0f
+        private var newWidth = 0f
+        private var newHeight = 0f
+        private var focusX = 0f
+        private var focusY = 0f
+
+        /**缩放倍数*/
+        private var mScaleFactor = 1f
+
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+            //获取多指之间的初始距离
+            lastSpanX = detector.currentSpanX
+            lastSpanY = detector.currentSpanY
+            return true
+        }
+
         override fun onScale(scaleGestureDetector: ScaleGestureDetector): Boolean {
-            mScaleFactor *= scaleGestureDetector.scaleFactor
+            val spanX = scaleGestureDetector.currentSpanX
+            val spanY = scaleGestureDetector.currentSpanY
+            //缩放后的新宽高
+            newWidth = lastSpanX / spanX * focusView.width
+            newHeight = lastSpanY / spanY * focusView.height
+            //获取多指焦点的平均x y坐标
+            focusX = scaleGestureDetector.focusX
+            focusY = scaleGestureDetector.focusY
+            Log.d(
+                "ImageEditView",
+                "spanX:$spanX spanY:$spanY lastSpanX:$lastSpanX lastSpanY:$lastSpanY newWidth:$newWidth newHeight:$newHeight focusX:$focusX focusY:$focusY"
+            )
+            mScaleFactor *= (lastSpanX / spanX)
             //限定缩放倍数的范围
             mScaleFactor = max(0.1f, min(mScaleFactor, 5f))
             when {
@@ -189,10 +250,19 @@ class ImageEditView : RelativeLayout {
                     Toast.makeText(context, "已经最大了", Toast.LENGTH_SHORT).show()
                 }
             }
-            scaleX = mScaleFactor
-            scaleY = mScaleFactor
+            focusView.scaleX = mScaleFactor
+            focusView.scaleY = mScaleFactor
             isScaling = true
+            lastSpanX = spanX
+            lastSpanY = spanY
             return true
+        }
+
+        override fun onScaleEnd(detector: ScaleGestureDetector?) {
+            focusView.apply {
+
+            }
+            isScaling =false
         }
     }
     private val mScaleDetector = ScaleGestureDetector(context, mScaleListener)
@@ -207,6 +277,7 @@ class ImageEditView : RelativeLayout {
                     //记录初始值
                     mLocationPoint = Float2(event.rawX, event.rawY)
                 }
+                Log.d("ImageEditView", "ACTION_DOWN x:${event.x} y:${event.y}")
             }
             MotionEvent.ACTION_MOVE -> {
                 //控制单指移动 且不在放缩时 平移
@@ -214,15 +285,29 @@ class ImageEditView : RelativeLayout {
                     //计算位移量
                     mTranslatePoint.x += event.rawX - mLocationPoint!!.x
                     mTranslatePoint.y += event.rawY - mLocationPoint!!.y
-                    translationX = mTranslatePoint.x
-                    translationY = mTranslatePoint.y
+                    focusView.apply {
+                        //平移动画
+                        translationX = mTranslatePoint.x
+                        translationY = mTranslatePoint.y
+                    }
                     mLocationPoint = Float2(event.rawX, event.rawY)
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 mLocationPoint = null
-                //手指松开时，重新初始化
-                isScaling = false
+                //因为手指抬起会重新计算focusView的真实位置，所以需要将位移记录清零
+                mTranslatePoint = Float2()
+                focusView.apply {
+                    //手指抬起时，因为focusView有平移，所以需要重新计算focusView的位置
+                    left += translationX.toInt()
+                    right += translationX.toInt()
+                    top += translationY.toInt()
+                    bottom += translationY.toInt()
+                    //清零focusView的位移量
+                    translationX = 0f
+                    translationY = 0f
+                }
+
             }
         }
     }
