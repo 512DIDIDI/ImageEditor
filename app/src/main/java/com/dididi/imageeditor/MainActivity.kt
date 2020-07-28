@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         activityMainAddWatermark.setOnClickListener {
-            imageEditor.setText(activityMainWatermarkEt.text.toString())
+            imageEditor.addText(activityMainWatermarkEt.text.toString())
         }
         activityMainPaintBtn.setOnClickListener {
             imageEditor.changePaintMode()

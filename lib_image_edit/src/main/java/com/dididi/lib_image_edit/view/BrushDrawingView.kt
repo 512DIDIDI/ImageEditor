@@ -29,9 +29,9 @@ class BrushDrawingView : View {
      */
     interface OnBrushDrawingListener{
         /**添加绘画路径*/
-        fun addView()
+        fun addView(brushDrawingView: BrushDrawingView)
         /**移除绘画路径*/
-        fun removeView()
+        fun removeView(brushDrawingView: BrushDrawingView)
         /**开始绘画*/
         fun startDrawing()
         /**停止绘画*/
@@ -182,7 +182,7 @@ class BrushDrawingView : View {
         mDrawnPaths.push(PathPaint(mPaintPath, mPaint))
         mPaintPath = Path()
         brushDrawingListener?.stopDrawing()
-        brushDrawingListener?.addView()
+        brushDrawingListener?.addView(this)
     }
 
     /**重置画笔*/
@@ -208,23 +208,30 @@ class BrushDrawingView : View {
 
     /**
      * 撤销上一步画笔
+     * @return 撤销成功返回true，否则false
      */
-    internal fun undo() {
-        if (mDrawnPaths.isNotEmpty()) {
+    internal fun undo(): Boolean {
+        brushDrawingListener?.removeView(this)
+        return if (mDrawnPaths.isNotEmpty()) {
             mRedoPaths.push(mDrawnPaths.pop())
             invalidate()
-            brushDrawingListener?.removeView()
+            true
+        } else {
+            false
         }
     }
 
     /**
      * redo撤销的历史记录
      */
-    internal fun redo() {
-        if (mRedoPaths.isNotEmpty()) {
+    internal fun redo(): Boolean {
+        brushDrawingListener?.addView(this)
+        return if (mRedoPaths.isNotEmpty()) {
             mDrawnPaths.push(mRedoPaths.pop())
             invalidate()
-            brushDrawingListener?.addView()
+            true
+        } else {
+            false
         }
     }
 

@@ -31,8 +31,6 @@ class ImageEditView : RelativeLayout {
         //布局id
         const val BACKGROUND_IMAGE_ID = 1
         const val BRUSH_ID = 2
-        const val TEXT_ID = 3
-        const val IMAGE_FILTER_ID = 4
     }
 
     constructor(context: Context) : this(context, null)
@@ -53,19 +51,6 @@ class ImageEditView : RelativeLayout {
     internal lateinit var brushDrawingView: BrushDrawingView
         private set
 
-    /**带有轮廓的水印文字*/
-    internal lateinit var outlineTextView: OutlineTextView
-        private set
-
-    /**水印文字的宽度覆盖范围*/
-    private var outlineTvWidthRange = 0f..0f
-
-    /**水印文字的高度覆盖范围*/
-    private var outlineTvHeightRange = 0f..0f
-
-    /**自定义View*/
-    internal var customViews = mutableListOf<CustomView>()
-
     /**图片滤镜*/
     internal lateinit var imageFilterView: ImageFilterView
         private set
@@ -85,6 +70,7 @@ class ImageEditView : RelativeLayout {
      */
     private var focusView: View = this
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initView(attrs: AttributeSet?) {
         //1.初始化背景图片并添加
         backgroundImageView = BackgroundImageView(context).apply {
@@ -120,30 +106,8 @@ class ImageEditView : RelativeLayout {
             visibility = GONE
             addView(this, viewParams)
         }
-        //3.添加文本
-        outlineTextView = OutlineTextView(context).apply {
-            id = TEXT_ID
-            visibility = GONE
-            val textParams =
-                LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT).also {
-                    it.addRule(CENTER_IN_PARENT, TRUE)
-                }
-            setPadding(20, 20, 20, 20)
-            addView(this, textParams)
-        }
-        //4.添加自定义view
-        customViews.apply {
-            if (isNotEmpty()) {
-                forEach {
-                    it.id = it.setViewId()
-                    it.visibility = GONE
-                    addView(it, it.setLayoutParams())
-                }
-            }
-        }
-        //5.增加滤镜
+        //3.增加滤镜
         imageFilterView = ImageFilterView(context).apply {
-            id = IMAGE_FILTER_ID
             visibility = GONE
             //同步滤镜与背景图片的bitmap
             backgroundImageView.onImageChangeListener = fun(it) {
@@ -177,19 +141,7 @@ class ImageEditView : RelativeLayout {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        outlineTvWidthRange = outlineTextView.left.toFloat()..outlineTextView.right.toFloat()
-        outlineTvHeightRange = outlineTextView.top.toFloat()..outlineTextView.bottom.toFloat()
         return if (onInterceptTouchEvent(event)) {
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                //只有在每次手指按下时，才会重新赋值focusView。
-                focusView = when {
-                    //水印框覆盖范围内，焦点控件为水印控件
-                    event.x in outlineTvWidthRange && event.y in outlineTvHeightRange -> {
-                        outlineTextView
-                    }
-                    else -> this
-                }
-            }
             //缩放操作由ScaleDetector处理
             mScaleDetector.onTouchEvent(event)
             //移动背景图片
@@ -206,40 +158,11 @@ class ImageEditView : RelativeLayout {
      */
     private val mScaleListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
 
-        /**多指之间的x距离*/
-        private var lastSpanX = 0f
-
-        /**多指之间的y距离*/
-        private var lastSpanY = 0f
-        private var newWidth = 0f
-        private var newHeight = 0f
-        private var focusX = 0f
-        private var focusY = 0f
-
         /**缩放倍数*/
         private var mScaleFactor = 1f
 
-        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
-            //获取多指之间的初始距离
-            lastSpanX = detector.currentSpanX
-            lastSpanY = detector.currentSpanY
-            return true
-        }
-
         override fun onScale(scaleGestureDetector: ScaleGestureDetector): Boolean {
-            val spanX = scaleGestureDetector.currentSpanX
-            val spanY = scaleGestureDetector.currentSpanY
-            //缩放后的新宽高
-            newWidth = lastSpanX / spanX * focusView.width
-            newHeight = lastSpanY / spanY * focusView.height
-            //获取多指焦点的平均x y坐标
-            focusX = scaleGestureDetector.focusX
-            focusY = scaleGestureDetector.focusY
-            Log.d(
-                "ImageEditView",
-                "spanX:$spanX spanY:$spanY lastSpanX:$lastSpanX lastSpanY:$lastSpanY newWidth:$newWidth newHeight:$newHeight focusX:$focusX focusY:$focusY"
-            )
-            mScaleFactor *= (lastSpanX / spanX)
+            mScaleFactor *= scaleGestureDetector.scaleFactor
             //限定缩放倍数的范围
             mScaleFactor = max(0.1f, min(mScaleFactor, 5f))
             when {
@@ -250,20 +173,14 @@ class ImageEditView : RelativeLayout {
                     Toast.makeText(context, "已经最大了", Toast.LENGTH_SHORT).show()
                 }
             }
-            focusView.scaleX = mScaleFactor
-            focusView.scaleY = mScaleFactor
+            focusView.apply {
+                scaleX = mScaleFactor
+                scaleY = mScaleFactor
+            }
             isScaling = true
-            lastSpanX = spanX
-            lastSpanY = spanY
             return true
         }
 
-        override fun onScaleEnd(detector: ScaleGestureDetector?) {
-            focusView.apply {
-
-            }
-            isScaling =false
-        }
     }
     private val mScaleDetector = ScaleGestureDetector(context, mScaleListener)
 
@@ -307,7 +224,8 @@ class ImageEditView : RelativeLayout {
                     translationX = 0f
                     translationY = 0f
                 }
-
+                //手指抬起时，缩放才结束
+                isScaling = false
             }
         }
     }

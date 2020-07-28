@@ -50,7 +50,6 @@ class OutlineTextView : AppCompatTextView {
 
     override fun setText(text: CharSequence?, type: BufferType?) {
         super.setText(text, type)
-        visibility = View.VISIBLE
         invalidate()
     }
 

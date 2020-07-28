@@ -17,7 +17,7 @@ import androidx.appcompat.widget.AppCompatImageView
 /**
  * @author dididi(yechao)
  * @since 29/06/2020
- * @describe 背景图片，实现了拖拽移动，和多指缩放等操作
+ * @describe 背景图片
  */
 
 @Suppress("MemberVisibilityCanBePrivate")
