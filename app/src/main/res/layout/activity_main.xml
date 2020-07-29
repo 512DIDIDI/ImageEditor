@@ -4,76 +4,97 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     tools:context=".MainActivity">
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"/>
-    </RelativeLayout>
 
     <com.dididi.lib_image_edit.view.ImageEditView
         android:id="@+id/activityMainBackgroundImage"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/activityMainBottomBar"
+        app:layout_constraintBottom_toTopOf="@id/activityMainToolsRv"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/activityMainBottomBar"
-        android:layout_width="match_parent"
+
+    <ImageView
+        android:id="@+id/activityMainOpenAlbum"
+        android:layout_width="48dp"
         android:layout_height="48dp"
-        android:orientation="horizontal"
+        android:layout_marginStart="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_gallery"
+        app:layout_constraintBottom_toTopOf="@id/activityMainToolsRv"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ImageView
+        android:id="@+id/activityMainCamera"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_camera"
+        app:layout_constraintBottom_toTopOf="@id/activityMainToolsRv"
+        app:layout_constraintStart_toEndOf="@id/activityMainOpenAlbum" />
+
+    <ImageView
+        android:id="@+id/activityMainUndo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_undo"
+        app:layout_constraintBottom_toTopOf="@id/activityMainToolsRv"
+        app:layout_constraintEnd_toStartOf="@id/activityMainRedo" />
+
+    <ImageView
+        android:id="@+id/activityMainRedo"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_redo"
+        app:layout_constraintBottom_toTopOf="@id/activityMainToolsRv"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/activityMainToolsRv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toTopOf="@id/activityMainClose" />
+
+    <ImageView
+        android:id="@+id/activityMainClose"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_close"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <EditText
-            android:id="@+id/activityMainWatermarkEt"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="5" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:padding="8dp"
+        android:text="@string/app_name"
+        android:textAlignment="center"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/activityMainSave"
+        app:layout_constraintStart_toEndOf="@id/activityMainClose" />
 
-        <Button
-            android:id="@+id/activityMainChooseImageBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/choose_image" />
+    <ImageView
+        android:id="@+id/activityMainSave"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:padding="8dp"
+        android:src="@drawable/ic_save"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-        <Button
-            android:id="@+id/activityMainAddWatermark"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="添加水印" />
-
-        <Button
-            android:id="@+id/activityMainPaintBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="绘制图形" />
-
-        <Button
-            android:id="@+id/activityMainEraserBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="橡皮擦"/>
-
-        <Button
-            android:id="@+id/activityMainUndoBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="撤销"/>
-
-        <Button
-            android:id="@+id/activityMainRedoBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="前进"/>
-
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
