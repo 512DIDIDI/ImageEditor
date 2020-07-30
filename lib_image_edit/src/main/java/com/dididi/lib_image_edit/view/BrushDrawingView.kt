@@ -24,14 +24,24 @@ class BrushDrawingView : View {
         const val TOUCH_TOLERANCE = 4f
     }
 
+    /**绘制模式*/
+    enum class PaintMode {
+        /**绘画模式*/
+        PAINT,
+        /**橡皮擦模式*/
+        ERASER
+    }
+
     /**
      * 绘画动作监听
      */
-    interface OnBrushDrawingListener{
+    interface OnBrushDrawingListener {
         /**添加绘画路径*/
         fun addView(brushDrawingView: BrushDrawingView)
+
         /**移除绘画路径*/
         fun removeView(brushDrawingView: BrushDrawingView)
+
         /**开始绘画*/
         fun startDrawing()
         /**停止绘画*/
@@ -68,6 +78,13 @@ class BrushDrawingView : View {
         set(value) {
             field = value
             mPaint.strokeWidth = value
+        }
+
+    /**画笔透明度*/
+    internal var paintOpacity = 255
+        set(value) {
+            field = value
+            mPaint.alpha = value
         }
 
     /**是否是绘制模式*/

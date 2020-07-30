@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Thickness"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toTopOf="@id/dialogBrushPickThickness" />
+
+    <SeekBar
+        android:id="@+id/dialogBrushPickThickness"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:progress="40"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@id/dialogBrushPickOpacityText" />
+
+    <TextView
+        android:id="@+id/dialogBrushPickOpacityText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Opacity"
+        android:textSize="16sp"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toTopOf="@id/dialogBrushPickOpacity" />
+
+    <SeekBar
+        android:id="@+id/dialogBrushPickOpacity"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        android:layout_marginBottom="8dp"
+        android:progress="100"
+        app:layout_constraintBottom_toTopOf="@id/dialogBrushPickColorRv" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/dialogBrushPickColorRv"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

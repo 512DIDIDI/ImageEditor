@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.view.View
 import android.widget.RelativeLayout
+import androidx.annotation.ColorInt
 import com.dididi.lib_image_edit.view.BrushDrawingView
 import com.dididi.lib_image_edit.view.ImageEditView
 import com.dididi.lib_image_edit.view.OutlineTextView
@@ -15,7 +16,6 @@ import com.dididi.lib_image_edit.view.OutlineTextView
  * @describe 图片编辑controller层 提供外部通用接口
  */
 
-@Suppress("unused")
 class ImageEditor private constructor(private val builder: Builder) :
     BrushDrawingView.OnBrushDrawingListener {
 
@@ -38,34 +38,50 @@ class ImageEditor private constructor(private val builder: Builder) :
         mBrushDrawingView.brushDrawingListener = this
     }
 
-    fun changePaintMode() {
-        mBrushDrawingView.paintMode = !mBrushDrawingView.paintMode
+    //region brush api
+    fun setBrushThickness(thickness: Float) {
+        mBrushDrawingView.paintWidth = thickness
+    }
+
+    fun setBrushOpacity(opacity: Float) {
+        mBrushDrawingView.paintOpacity = (opacity * 2.56).toInt()
+    }
+
+    fun setBrushColor(@ColorInt color: Int) {
+        mBrushDrawingView.paintColor = color
+    }
+
+    /**
+     * 设置绘制模式
+     * @param paintMode 绘制 or 橡皮擦
+     */
+    fun setPaintMode(paintMode: BrushDrawingView.PaintMode) {
+        when (paintMode) {
+            BrushDrawingView.PaintMode.PAINT -> mBrushDrawingView.paintMode = true
+            BrushDrawingView.PaintMode.ERASER -> mBrushDrawingView.eraserMode = true
+        }
         mBrushDrawingView.visibility = View.VISIBLE
     }
 
-    fun changeEraserMode() {
-        mBrushDrawingView.eraserMode = !mBrushDrawingView.eraserMode
-        mBrushDrawingView.visibility = View.VISIBLE
+    /**退出绘制模式*/
+    fun exitPaintMode() {
+        /**改变橡皮擦模式也会同时修改paintMode*/
+        mBrushDrawingView.eraserMode = false
     }
+    //endregion
 
+    //region add view api
     /**
      * 添加文本水印
      * @param text 文字
      */
-    fun addText(text: CharSequence,textColor:Int = Color.WHITE) {
+    fun addText(text: CharSequence, textColor: Int = Color.WHITE) {
         //创建文本控件
         OutlineTextView(builder.context).apply {
-            val textParams =
-                RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,
-                    RelativeLayout.LayoutParams.WRAP_CONTENT
-                ).also {
-                    it.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-                }
             setPadding(20, 20, 20, 20)
             setText(text)
             setTextColor(textColor)
-            addViewToParent(this,textParams)
+            addViewToParent(this)
         }
     }
 
@@ -76,25 +92,32 @@ class ImageEditor private constructor(private val builder: Builder) :
 
     }
 
-
-
     /**
      * 添加到parentView当中，也就是ImageEditView
      */
-    private fun addViewToParent(view:View,param:RelativeLayout.LayoutParams){
-        //禁用画笔绘制模式，设置eraserMode等于false，会同时更改paintMode为false
-        mBrushDrawingView.eraserMode = false
+    private fun addViewToParent(view: View) {
+        exitPaintMode()
+        val param = RelativeLayout.LayoutParams(
+            RelativeLayout.LayoutParams.WRAP_CONTENT,
+            RelativeLayout.LayoutParams.WRAP_CONTENT
+        ).also {
+            it.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+        }
         mParentView.addView(view, param)
         mAddViews.add(view)
         //添加新view，前进栈清空
         mRedoViews.clear()
     }
 
+    //endregion
+
+    //region undo/redo api
+
     /**
      * 撤销上一步操作
      */
     fun undo(): Boolean {
-        mBrushDrawingView.eraserMode = false
+        exitPaintMode()
         if (mAddViews.isNotEmpty()) {
             val removeView = mAddViews[mAddViews.size - 1]
             //判断当前要撤销的是否是画笔
@@ -115,7 +138,7 @@ class ImageEditor private constructor(private val builder: Builder) :
      * 从[mRedoViews]中读取记录，再添加到[mAddViews]中保存记录
      */
     fun redo(): Boolean {
-        mBrushDrawingView.eraserMode = false
+        exitPaintMode()
         if (mRedoViews.isNotEmpty()) {
             val redoView = mRedoViews[mRedoViews.size - 1]
             if (redoView is BrushDrawingView) {
@@ -144,7 +167,8 @@ class ImageEditor private constructor(private val builder: Builder) :
     }
 
     /**
-     * 添加[BrushDrawingView]，在调用绘画[touchUp] [BrushDrawingView.redo]时调用
+     * 添加[BrushDrawingView]
+     * 在两种情况下调用 1.绘画开始时 2.[BrushDrawingView.redo]
      */
     override fun addView(brushDrawingView: BrushDrawingView) {
         if (mRedoViews.isNotEmpty()) {
@@ -160,4 +184,6 @@ class ImageEditor private constructor(private val builder: Builder) :
 
     override fun stopDrawing() {
     }
+
+    //endregion
 }

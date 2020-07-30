@@ -14,19 +14,33 @@ import android.os.Bundle
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.afollestad.materialdialogs.LayoutMode
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.bottomsheets.BottomSheet
+import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
+import com.dididi.imageeditor.adpater.ColorPickAdapter
 import com.dididi.imageeditor.adpater.ToolsAdapter
 import com.dididi.imageeditor.adpater.ToolsType
+import com.dididi.imageeditor.util.getPictureDegree
+import com.dididi.imageeditor.util.rotateImage
 import com.dididi.lib_image_edit.controller.ImageEditor
+import com.dididi.lib_image_edit.view.BrushDrawingView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Suppress("SameParameterValue")
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
 
     companion object {
         const val OPEN_ALBUM = 1
@@ -53,11 +67,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
         val adapter = ToolsAdapter()
-        adapter.itemClickListener = fun(type) {
-            when (type) {
-                ToolsType.BRUSH -> imageEditor.changePaintMode()
+        adapter.itemClickListener = {
+            when (it) {
+                ToolsType.BRUSH -> showBrushDialog()
                 ToolsType.TEXT -> imageEditor.addText("hello world")
-                ToolsType.ERASER -> imageEditor.changeEraserMode()
+                ToolsType.ERASER -> imageEditor.setPaintMode(BrushDrawingView.PaintMode.ERASER)
                 ToolsType.FILTER -> {
                     Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
                 }
@@ -75,6 +89,49 @@ class MainActivity : AppCompatActivity() {
         activityMainRedo.setOnClickListener {
             imageEditor.redo()
         }
+        activityMainClose.setOnClickListener {
+            finish()
+        }
+        activityMainExitMode.setOnClickListener {
+            imageEditor.exitPaintMode()
+        }
+    }
+
+    private fun showBrushDialog() {
+        val dialog = MaterialDialog(this, BottomSheet(LayoutMode.WRAP_CONTENT)).show {
+            customView(R.layout.dialog_brush_pick)
+        }
+        val view = dialog.getCustomView()
+        val colorAdapter = ColorPickAdapter(this)
+        colorAdapter.colorChangeListener = {
+            imageEditor.setBrushColor(it)
+            imageEditor.setPaintMode(BrushDrawingView.PaintMode.PAINT)
+            dialog.dismiss()
+        }
+        val colorRv = view.findViewById<RecyclerView>(R.id.dialogBrushPickColorRv)
+        colorRv.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        colorRv.adapter = colorAdapter
+        val thicknessSb = view.findViewById<SeekBar>(R.id.dialogBrushPickThickness)
+        val opacitySb = view.findViewById<SeekBar>(R.id.dialogBrushPickOpacity)
+        thicknessSb.setOnSeekBarChangeListener(this)
+        opacitySb.setOnSeekBarChangeListener(this)
+    }
+
+    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+        when(seekBar?.id){
+            R.id.dialogBrushPickThickness -> {
+                imageEditor.setBrushThickness(progress.toFloat())
+            }
+            R.id.dialogBrushPickOpacity -> {
+                imageEditor.setBrushOpacity(progress.toFloat())
+            }
+        }
+    }
+
+    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+    }
+
+    override fun onStopTrackingTouch(seekBar: SeekBar?) {
     }
 
     //region 相机/相册业务逻辑
@@ -120,7 +177,10 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             OPEN_CAMERA -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    imageEditor.backgroundImageView.setImageBitmap(getBitmapByCamera(cameraPhotoUri))
+                    BitmapFactory.decodeFile(currentPhotoPath).also {
+                        val bitmap = it.rotateImage(getPictureDegree(currentPhotoPath).toFloat())
+                        imageEditor.backgroundImageView.setImageBitmap(bitmap)
+                    }
                 }
             }
             OPEN_ALBUM -> {
@@ -138,32 +198,46 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private lateinit var cameraPhotoUri: Uri
 
     /**
      * 打开相机
      */
     private fun openCamera() {
-        //创建file于sdcard/pocketPicture/ 以当前时间命名的jpg图像
-        cameraPhotoUri = File(
-            Environment.getExternalStorageDirectory().absolutePath,
-            "/pocket/picture/" + System.currentTimeMillis() + ".jpg"
-        ).let {
-            it.parentFile.mkdirs()
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                //android7.0之后，不再允许app透露file://Uri给其他app
-                //转而使用FileProvider来生成content://Uri取代file://Uri
-                FileProvider
-                    .getUriForFile(this, "${this.application.packageName}.provider", it)
-            } else {
-                //7.0之前 直接获取Uri
-                Uri.fromFile(it)
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { intent ->
+            intent.resolveActivity(packageManager)?.also {
+                val photoFile = try {
+                    createImageFile()
+                } catch (e: IOException) {
+                    null
+                }
+                photoFile?.also {
+                    val photoUri = FileProvider.getUriForFile(
+                        this,
+                        "${BuildConfig.APPLICATION_ID}.provider",
+                        it
+                    )
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                    startActivityForResult(intent, OPEN_CAMERA)
+                }
             }
         }
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-            putExtra(MediaStore.EXTRA_OUTPUT, cameraPhotoUri)
-            //将uri存进intent，供相机回调使用 data.getData中获取
-            startActivityForResult(this, OPEN_CAMERA)
+    }
+
+    private lateinit var currentPhotoPath: String
+
+    /**
+     * 创建相机临时图片
+     */
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.CHINA).format(Date())
+        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+            "JPEG_$timeStamp",
+            ".jpg",
+            storageDir
+        ).apply {
+            currentPhotoPath = absolutePath
         }
     }
 
@@ -221,15 +295,11 @@ class MainActivity : AppCompatActivity() {
         } else {
             Uri.parse(imagePath)
         }
-        return MediaStore.Images.Media.getBitmap(this.contentResolver, oriUri)
+        return MediaStore.Images.Media.getBitmap(this.contentResolver, oriUri).rotateImage(
+            getPictureDegree(imagePath).toFloat()
+        )
     }
 
-
-    /**
-     * 获取相机拍下的uri并转为bitmap
-     */
-    fun getBitmapByCamera(uri: Uri) = BitmapFactory
-        .decodeStream(this.contentResolver.openInputStream(uri))!!
 
 
     private fun handleImageAfterKitKat(data: Intent): String {
