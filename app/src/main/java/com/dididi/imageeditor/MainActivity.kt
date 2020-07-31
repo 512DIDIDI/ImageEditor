@@ -29,6 +29,7 @@ import com.afollestad.materialdialogs.customview.getCustomView
 import com.dididi.imageeditor.adpater.ColorPickAdapter
 import com.dididi.imageeditor.adpater.ToolsAdapter
 import com.dididi.imageeditor.adpater.ToolsType
+import com.dididi.imageeditor.dialog.TextDialog
 import com.dididi.imageeditor.util.getPictureDegree
 import com.dididi.imageeditor.util.rotateImage
 import com.dididi.lib_image_edit.controller.ImageEditor
@@ -68,10 +69,17 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
         }
         val adapter = ToolsAdapter()
         adapter.itemClickListener = {
+            activityMainExitMode.text = resources.getString(R.string.reset_position)
             when (it) {
-                ToolsType.BRUSH -> showBrushDialog()
-                ToolsType.TEXT -> imageEditor.addText("hello world")
-                ToolsType.ERASER -> imageEditor.setPaintMode(BrushDrawingView.PaintMode.ERASER)
+                ToolsType.BRUSH -> {
+                    activityMainExitMode.text = resources.getString(R.string.exit_paint_mode)
+                    showBrushDialog()
+                }
+                ToolsType.TEXT -> showTextDialog()
+                ToolsType.ERASER -> {
+                    activityMainExitMode.text = resources.getString(R.string.exit_paint_mode)
+                    imageEditor.setPaintMode(BrushDrawingView.PaintMode.ERASER)
+                }
                 ToolsType.FILTER -> {
                     Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
                 }
@@ -93,7 +101,14 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
             finish()
         }
         activityMainExitMode.setOnClickListener {
-            imageEditor.exitPaintMode()
+            if (imageEditor.isPaintMode) {
+                imageEditor.exitPaintMode()
+            } else {
+                Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
+            }
+        }
+        activityMainSave.setOnClickListener {
+            Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -117,8 +132,15 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
         opacitySb.setOnSeekBarChangeListener(this)
     }
 
+    private fun showTextDialog() {
+        val dialog = TextDialog.show(this)
+        dialog.textFinishListener = { content, color ->
+            imageEditor.addText(content, color)
+        }
+    }
+
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-        when(seekBar?.id){
+        when (seekBar?.id) {
             R.id.dialogBrushPickThickness -> {
                 imageEditor.setBrushThickness(progress.toFloat())
             }

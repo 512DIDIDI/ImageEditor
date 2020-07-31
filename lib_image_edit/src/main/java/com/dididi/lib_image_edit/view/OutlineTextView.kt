@@ -5,9 +5,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.view.View
 import androidx.appcompat.widget.AppCompatTextView
+import com.dididi.lib_image_edit.R
 
 
 /**
@@ -23,7 +22,25 @@ class OutlineTextView : AppCompatTextView {
         context,
         attrs,
         defStyleAttr
-    )
+    ) {
+        initView(attrs)
+    }
+
+    var fillColor = Color.TRANSPARENT
+        set(value) {
+            field = value
+            fillPaint.color = value
+        }
+
+    private fun initView(attrs: AttributeSet?) {
+        attrs?.apply {
+            //获取属性的背景色
+            val typedArray = context.obtainStyledAttributes(this, R.styleable.OutlineTextView)
+            fillColor =
+                typedArray.getColor(R.styleable.OutlineTextView_text_background, Color.TRANSPARENT)
+            typedArray.recycle()
+        }
+    }
 
     private val pathPaint = Paint().apply {
         style = Paint.Style.STROKE
@@ -32,8 +49,12 @@ class OutlineTextView : AppCompatTextView {
         setARGB(120, 255, 255, 255)
     }
 
+    private val fillPaint = Paint().apply {
+        style = Paint.Style.FILL
+        color = fillColor
+    }
+
     override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
         canvas?.also {
             //画轮廓
             it.drawRoundRect(
@@ -45,7 +66,18 @@ class OutlineTextView : AppCompatTextView {
                 10f,
                 pathPaint
             )
+            //画背景色
+            it.drawRoundRect(
+                5f,
+                5f,
+                width - 5f,
+                height - 5f,
+                10f,
+                10f,
+                fillPaint
+            )
         }
+        super.onDraw(canvas)
     }
 
     override fun setText(text: CharSequence?, type: BufferType?) {

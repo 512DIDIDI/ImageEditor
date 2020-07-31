@@ -39,6 +39,10 @@ class ImageEditor private constructor(private val builder: Builder) :
     }
 
     //region brush api
+
+    /**是否处于绘制模式*/
+    var isPaintMode = mBrushDrawingView.paintMode
+
     fun setBrushThickness(thickness: Float) {
         mBrushDrawingView.paintWidth = thickness
     }
@@ -80,6 +84,7 @@ class ImageEditor private constructor(private val builder: Builder) :
         OutlineTextView(builder.context).apply {
             setPadding(20, 20, 20, 20)
             setText(text)
+
             setTextColor(textColor)
             addViewToParent(this)
         }

@@ -2,4 +2,6 @@
     <string name="app_name">ImageEditor</string>
     <string name="choose_image">选择图片</string>
     <string name="open_album">open album</string>
+    <string name="exit_paint_mode">EXIT PAINT MODE</string>
+    <string name="reset_position">RESET POSITION</string>
 </resources>
