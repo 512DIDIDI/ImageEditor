@@ -56,16 +56,18 @@ class OutlineTextView : AppCompatTextView {
 
     override fun onDraw(canvas: Canvas?) {
         canvas?.also {
-            //画轮廓
-            it.drawRoundRect(
-                5f,
-                5f,
-                width - 5f,
-                height - 5f,
-                10f,
-                10f,
-                pathPaint
-            )
+            if (isFocusable){
+                //画轮廓
+                it.drawRoundRect(
+                    5f,
+                    5f,
+                    width - 5f,
+                    height - 5f,
+                    10f,
+                    10f,
+                    pathPaint
+                )
+            }
             //画背景色
             it.drawRoundRect(
                 5f,
@@ -78,16 +80,6 @@ class OutlineTextView : AppCompatTextView {
             )
         }
         super.onDraw(canvas)
-    }
-
-    override fun setText(text: CharSequence?, type: BufferType?) {
-        super.setText(text, type)
-        invalidate()
-    }
-
-    override fun setTextSize(size: Float) {
-        super.setTextSize(size)
-        invalidate()
     }
 }
 

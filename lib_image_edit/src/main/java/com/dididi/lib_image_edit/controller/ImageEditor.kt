@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.view.View
 import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
+import com.dididi.lib_image_edit.event.MultiTouchListener
 import com.dididi.lib_image_edit.view.BrushDrawingView
 import com.dididi.lib_image_edit.view.ImageEditView
 import com.dididi.lib_image_edit.view.OutlineTextView
@@ -41,7 +42,10 @@ class ImageEditor private constructor(private val builder: Builder) :
     //region brush api
 
     /**是否处于绘制模式*/
-    var isPaintMode = mBrushDrawingView.paintMode
+    val isPaintMode: Boolean
+        get() {
+            return mBrushDrawingView.paintMode
+        }
 
     fun setBrushThickness(thickness: Float) {
         mBrushDrawingView.paintWidth = thickness
@@ -84,17 +88,24 @@ class ImageEditor private constructor(private val builder: Builder) :
         OutlineTextView(builder.context).apply {
             setPadding(20, 20, 20, 20)
             setText(text)
-
             setTextColor(textColor)
             addViewToParent(this)
+            setOnTouchListener(MultiTouchListener(context))
         }
     }
 
     /**
      * 添加表情包
      */
-    fun addEmoji(){
+    fun addEmoji() {
 
+    }
+
+    /**
+     * 添加自定义view
+     */
+    fun addCustomView(block: () -> View) {
+        addViewToParent(block())
     }
 
     /**

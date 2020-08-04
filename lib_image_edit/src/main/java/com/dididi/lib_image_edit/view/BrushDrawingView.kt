@@ -13,7 +13,7 @@ import kotlin.math.abs
 /**
  * @author dididi(yechao)
  * @since 29/06/2020
- * @describe 画笔/橡皮擦 view 在[BackgroundImageView]之上，其他[CustomView]之下
+ * @describe 画笔/橡皮擦 view 在[BackgroundImageView]之上，其他view之下
  */
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")

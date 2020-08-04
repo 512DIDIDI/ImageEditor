@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
                     Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
                 }
                 ToolsType.EMOJI -> {
-                    Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
+                    showEmojiDialog()
                 }
             }
         }
@@ -103,6 +103,7 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
         activityMainExitMode.setOnClickListener {
             if (imageEditor.isPaintMode) {
                 imageEditor.exitPaintMode()
+                activityMainExitMode.text = resources.getString(R.string.reset_position)
             } else {
                 Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
             }
@@ -136,6 +137,12 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
         val dialog = TextDialog.show(this)
         dialog.textFinishListener = { content, color ->
             imageEditor.addText(content, color)
+        }
+    }
+
+    private fun showEmojiDialog(){
+        val dialog = MaterialDialog(this,BottomSheet(LayoutMode.WRAP_CONTENT)).show {
+            customView(R.layout.dialog_emoji)
         }
     }
 
