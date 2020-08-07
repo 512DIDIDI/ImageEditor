@@ -20,7 +20,6 @@ import androidx.appcompat.widget.AppCompatImageView
  * @describe 背景图片
  */
 
-@Suppress("MemberVisibilityCanBePrivate")
 class BackgroundImageView : AppCompatImageView {
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)

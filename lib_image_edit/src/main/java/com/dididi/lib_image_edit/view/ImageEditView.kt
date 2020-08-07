@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.RelativeLayout
 import android.widget.Toast
 import com.dididi.lib_image_edit.R
+import com.dididi.lib_image_edit.const.ImageFilter
 import com.dididi.lib_image_edit.event.MultiTouchListener
 import kotlin.math.max
 import kotlin.math.min
@@ -112,7 +113,7 @@ class ImageEditView : RelativeLayout {
             visibility = GONE
             //同步滤镜与背景图片的bitmap
             backgroundImageView.onImageChangeListener = fun(it) {
-                imageFilterView.setFilterEffect()
+                imageFilterView.setFilterEffect(ImageFilter.ORIGIN)
                 imageFilterView.setSourceBitmap(it)
             }
             addView(this, viewParams)
