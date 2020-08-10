@@ -1,6 +1,5 @@
 package com.dididi.lib_image_edit.view
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -13,10 +12,9 @@ import kotlin.math.abs
 /**
  * @author dididi(yechao)
  * @since 29/06/2020
- * @describe 画笔/橡皮擦 view 在[BackgroundImageView]之上，其他view之下
+ * @describe 画笔/橡皮擦 view
  */
 
-@Suppress("unused", "MemberVisibilityCanBePrivate")
 class BrushDrawingView : View {
 
     companion object {
@@ -26,6 +24,8 @@ class BrushDrawingView : View {
 
     /**绘制模式*/
     enum class PaintMode {
+        /**未处在绘制模式中*/
+        NONE,
         /**绘画模式*/
         PAINT,
         /**橡皮擦模式*/
@@ -87,18 +87,30 @@ class BrushDrawingView : View {
             mPaint.alpha = value
         }
 
-    /**是否是绘制模式*/
-    internal var paintMode = false
+    /**绘制模式选择 [PaintMode]*/
+    var paintMode: PaintMode = PaintMode.NONE
+        set(value) {
+            visibility = VISIBLE
+            when (value) {
+                PaintMode.PAINT -> isPaint = true
+                PaintMode.ERASER -> isEraser = true
+                PaintMode.NONE -> isEraser = false
+            }
+            field = value
+        }
+
+    /**是否是绘画*/
+    private var isPaint = false
         set(value) {
             field = value
             mPaint.xfermode = if (value) paintXfermode else null
         }
 
     /**是否是橡皮擦模式*/
-    internal var eraserMode = false
+    private var isEraser = false
         set(value) {
             field = value
-            paintMode = value
+            isPaint = value
             mPaint.xfermode = if (value) eraserXfermode else null
         }
 
@@ -127,10 +139,9 @@ class BrushDrawingView : View {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         //如果处于painting模式，则直接拦截触摸事件
-        if (paintMode) {
+        if (isPaint) {
             when (event?.action) {
                 MotionEvent.ACTION_DOWN -> {
                     //获取起点
@@ -156,8 +167,8 @@ class BrushDrawingView : View {
         super.onDetachedFromWindow()
         mDrawnPaths.clear()
         mRedoPaths.clear()
-        paintMode = false
-        eraserMode = false
+        isPaint = false
+        isEraser = false
     }
 
     /**
@@ -203,8 +214,8 @@ class BrushDrawingView : View {
     }
 
     /**重置画笔*/
-    internal fun resetPaint(){
-        setLayerType(LAYER_TYPE_SOFTWARE,null)
+    private fun resetPaint() {
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
         mPaint.apply {
             style = Paint.Style.STROKE
             strokeCap = Paint.Cap.ROUND

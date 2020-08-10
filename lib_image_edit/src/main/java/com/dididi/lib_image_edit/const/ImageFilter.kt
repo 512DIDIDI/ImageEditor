@@ -4,7 +4,7 @@ package com.dididi.lib_image_edit.const
 /**
  * @author dididi(yechao)
  * @since 05/08/2020
- * @describe 滤镜
+ * @describe 滤镜样式
  */
 
 enum class ImageFilter {

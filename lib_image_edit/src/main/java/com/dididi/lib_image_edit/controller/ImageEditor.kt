@@ -1,14 +1,23 @@
 package com.dididi.lib_image_edit.controller
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.view.View
 import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
+import androidx.annotation.RequiresPermission
+import com.dididi.lib_image_edit.config.SaveSetting
 import com.dididi.lib_image_edit.event.MultiTouchListener
+import com.dididi.lib_image_edit.ext.getBitmap
 import com.dididi.lib_image_edit.view.BrushDrawingView
 import com.dididi.lib_image_edit.view.ImageEditView
 import com.dididi.lib_image_edit.view.OutlineTextView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 
 /**
@@ -34,6 +43,8 @@ class ImageEditor private constructor(private val builder: Builder) :
     val backgroundImageView = builder.backgroundImageView
     private val mAddViews = mutableListOf<View>()
     private val mRedoViews = mutableListOf<View>()
+    /**主线程*/
+    private val mainScope = CoroutineScope(Dispatchers.Main)
 
     init {
         mBrushDrawingView.brushDrawingListener = this
@@ -44,7 +55,7 @@ class ImageEditor private constructor(private val builder: Builder) :
     /**是否处于绘制模式*/
     val isPaintMode: Boolean
         get() {
-            return mBrushDrawingView.paintMode
+            return mBrushDrawingView.paintMode != BrushDrawingView.PaintMode.NONE
         }
 
     fun setBrushThickness(thickness: Float) {
@@ -64,19 +75,37 @@ class ImageEditor private constructor(private val builder: Builder) :
      * @param paintMode 绘制 or 橡皮擦
      */
     fun setPaintMode(paintMode: BrushDrawingView.PaintMode) {
-        when (paintMode) {
-            BrushDrawingView.PaintMode.PAINT -> mBrushDrawingView.paintMode = true
-            BrushDrawingView.PaintMode.ERASER -> mBrushDrawingView.eraserMode = true
-        }
-        mBrushDrawingView.visibility = View.VISIBLE
+        mBrushDrawingView.paintMode = paintMode
     }
 
     /**退出绘制模式*/
     fun exitPaintMode() {
-        /**改变橡皮擦模式也会同时修改paintMode*/
-        mBrushDrawingView.eraserMode = false
+        mBrushDrawingView.paintMode = BrushDrawingView.PaintMode.NONE
     }
     //endregion
+
+    /**
+     * 保存文件
+     */
+    @RequiresPermission(allOf = [android.Manifest.permission.WRITE_EXTERNAL_STORAGE])
+    fun saveAsFile(
+        filePath: String,
+        finish:(Bitmap) -> Unit,
+        saveSetting: SaveSetting = SaveSetting.Builder().build()
+    ) {
+        val file = File(filePath)
+        if (!file.exists()){
+            file.createNewFile()
+        }
+        mainScope.launch {
+            withContext(Dispatchers.IO){
+                file.outputStream().use {
+                    mParentView.getBitmap().compress(saveSetting.compressFormat,saveSetting.compressQuality,it)
+                }
+            }
+            finish(mParentView.getBitmap())
+        }
+    }
 
     //region add view api
     /**

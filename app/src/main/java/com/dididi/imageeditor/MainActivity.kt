@@ -17,6 +17,7 @@ import android.provider.MediaStore
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,10 +31,9 @@ import com.dididi.imageeditor.adpater.ColorPickAdapter
 import com.dididi.imageeditor.adpater.ToolsAdapter
 import com.dididi.imageeditor.adpater.ToolsType
 import com.dididi.imageeditor.dialog.TextDialog
-import com.dididi.imageeditor.util.getPictureDegree
-import com.dididi.imageeditor.util.rotateImage
 import com.dididi.lib_image_edit.controller.ImageEditor
 import com.dididi.lib_image_edit.view.BrushDrawingView
+import com.dididi.uiextlib.ext.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.io.IOException
@@ -109,7 +109,21 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
             }
         }
         activityMainSave.setOnClickListener {
-            Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
+            val filePath =
+                "${this.getExternalFilesDir(null)?.absolutePath}/${System.currentTimeMillis()}.png"
+            showLoading()
+            applyWritePermission(PERMISSION_CODE) {
+                if (ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    imageEditor.saveAsFile(filePath, {
+                        dismissAllLoading()
+                        showSnackBar("save success")
+                    })
+                }
+            }
         }
     }
 
