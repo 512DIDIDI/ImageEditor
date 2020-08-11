@@ -34,7 +34,7 @@
             android:layout_height="@dimen/icon_size"
             android:layout_marginStart="16dp"
             android:padding="8dp"
-            android:src="@drawable/ic_camera"
+            android:src="@drawable/camera"
             app:layout_constraintBottom_toTopOf="@id/activityMainToolsRv"
             app:layout_constraintStart_toEndOf="@id/activityMainOpenAlbum" />
 
@@ -44,7 +44,7 @@
             android:layout_height="@dimen/icon_size"
             android:layout_marginEnd="16dp"
             android:padding="8dp"
-            android:src="@drawable/ic_undo"
+            android:src="@drawable/back"
             app:layout_constraintBottom_toTopOf="@id/activityMainToolsRv"
             app:layout_constraintEnd_toStartOf="@id/activityMainRedo" />
 
@@ -54,7 +54,7 @@
             android:layout_height="@dimen/icon_size"
             android:layout_marginEnd="16dp"
             android:padding="8dp"
-            android:src="@drawable/ic_redo"
+            android:src="@drawable/forward"
             app:layout_constraintBottom_toTopOf="@id/activityMainToolsRv"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -72,7 +72,7 @@
             android:layout_height="@dimen/icon_size"
             android:layout_marginStart="16dp"
             android:padding="8dp"
-            android:src="@drawable/ic_close"
+            android:src="@drawable/close"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -95,7 +95,7 @@
             android:layout_height="@dimen/icon_size"
             android:layout_marginEnd="16dp"
             android:padding="8dp"
-            android:src="@drawable/ic_save"
+            android:src="@drawable/download"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

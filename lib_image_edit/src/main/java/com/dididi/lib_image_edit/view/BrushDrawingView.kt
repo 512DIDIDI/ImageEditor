@@ -15,7 +15,11 @@ import kotlin.math.abs
  * @describe 画笔/橡皮擦 view
  */
 
-class BrushDrawingView : View {
+class BrushDrawingView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : View(
+    context,
+    attrs,
+    defStyleAttr
+) {
 
     companion object {
         /**绘制触发阈值*/
@@ -50,11 +54,6 @@ class BrushDrawingView : View {
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    )
 
     private var mPaintPath = Path()
     private val mPaint = Paint()
@@ -88,7 +87,7 @@ class BrushDrawingView : View {
         }
 
     /**绘制模式选择 [PaintMode]*/
-    var paintMode: PaintMode = PaintMode.NONE
+    internal var paintMode: PaintMode = PaintMode.NONE
         set(value) {
             visibility = VISIBLE
             when (value) {

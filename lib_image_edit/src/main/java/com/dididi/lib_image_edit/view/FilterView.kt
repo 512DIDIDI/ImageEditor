@@ -16,16 +16,19 @@ import javax.microedition.khronos.opengles.GL10
  */
 
 @Suppress("UNUSED_PARAMETER")
-class ImageFilterView(context: Context, attrs: AttributeSet?) : GLSurfaceView(context, attrs),
+class FilterView(context: Context, attrs: AttributeSet?) : GLSurfaceView(context, attrs),
     GLSurfaceView.Renderer {
     constructor(context: Context) : this(context, null)
 
     /**当前滤镜*/
     private var mCurrentFilter = ImageFilter.ORIGIN
+
     /**接收到的[BackgroundImageView]中的bitmap*/
-    private var mSourceBitmap:Bitmap? = null
-    /***/
+    private var mSourceBitmap: Bitmap? = null
+
+    /**是否初始化open GL渲染器*/
     private var isInitialized = false
+
 
     init {
         //使用openGL ES 2.0
@@ -38,18 +41,23 @@ class ImageFilterView(context: Context, attrs: AttributeSet?) : GLSurfaceView(co
         setFilterEffect(ImageFilter.ORIGIN)
     }
 
+    /**设置滤镜*/
     internal fun setFilterEffect(imageFilter: ImageFilter) {
         mCurrentFilter = imageFilter
         requestRender()
     }
 
+    /**传入源bitmap*/
     internal fun setSourceBitmap(src: Bitmap?) {
         mSourceBitmap = src
         isInitialized = false
     }
 
+
     /**执行渲染工作*/
     override fun onDrawFrame(gl: GL10?) {
+        if (!isInitialized) {
+        }
         TODO("Not yet implemented")
     }
 

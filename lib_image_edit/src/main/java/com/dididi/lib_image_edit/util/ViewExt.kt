@@ -1,4 +1,4 @@
-package com.dididi.lib_image_edit.ext
+package com.dididi.lib_image_edit.util
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -12,7 +12,7 @@ import android.view.View
  */
 
 /**
- * 获取view的bitmap，截取view的当前画面
+ * 截取view的当前画面作为bitmap返回
  */
 fun View.getBitmap(): Bitmap {
     val bitmap = Bitmap.createBitmap(this.width, this.height, Bitmap.Config.ARGB_8888)

@@ -57,16 +57,19 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        //打开相册
         activityMainOpenAlbum.setOnClickListener {
             applyWritePermission(OPEN_ALBUM) {
                 openAlbum()
             }
         }
+        //打开相机
         activityMainCamera.setOnClickListener {
             applyCameraPermission(OPEN_CAMERA) {
                 openCamera()
             }
         }
+        //下方工具栏
         val adapter = ToolsAdapter()
         adapter.itemClickListener = {
             activityMainExitMode.text = resources.getString(R.string.reset_position)
@@ -80,7 +83,7 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
                     activityMainExitMode.text = resources.getString(R.string.exit_paint_mode)
                     imageEditor.setPaintMode(BrushDrawingView.PaintMode.ERASER)
                 }
-                ToolsType.FILTER -> {
+                ToolsType.CLIP -> {
                     Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
                 }
                 ToolsType.EMOJI -> {
@@ -91,23 +94,28 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
         activityMainToolsRv.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         activityMainToolsRv.adapter = adapter
+        //撤销
         activityMainUndo.setOnClickListener {
             imageEditor.undo()
         }
+        //前进
         activityMainRedo.setOnClickListener {
             imageEditor.redo()
         }
+        //关闭
         activityMainClose.setOnClickListener {
             finish()
         }
+        //退出模式
         activityMainExitMode.setOnClickListener {
             if (imageEditor.isPaintMode) {
                 imageEditor.exitPaintMode()
                 activityMainExitMode.text = resources.getString(R.string.reset_position)
             } else {
-                Toast.makeText(this, "not implementation", Toast.LENGTH_SHORT).show()
+                imageEditor.resetPosition()
             }
         }
+        //保存图片
         activityMainSave.setOnClickListener {
             val filePath =
                 "${this.getExternalFilesDir(null)?.absolutePath}/${System.currentTimeMillis()}.png"
@@ -127,6 +135,7 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
         }
     }
 
+    /**画笔弹窗*/
     private fun showBrushDialog() {
         val dialog = MaterialDialog(this, BottomSheet(LayoutMode.WRAP_CONTENT)).show {
             customView(R.layout.dialog_brush_pick)
@@ -147,6 +156,7 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
         opacitySb.setOnSeekBarChangeListener(this)
     }
 
+    /**文字弹窗*/
     private fun showTextDialog() {
         val dialog = TextDialog.show(this)
         dialog.textFinishListener = { content, color ->
@@ -154,12 +164,14 @@ class MainActivity : AppCompatActivity() ,SeekBar.OnSeekBarChangeListener{
         }
     }
 
+    /**emoji弹窗*/
     private fun showEmojiDialog(){
         val dialog = MaterialDialog(this,BottomSheet(LayoutMode.WRAP_CONTENT)).show {
             customView(R.layout.dialog_emoji)
         }
     }
 
+    /**画笔弹窗seekBar监听*/
     override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
         when (seekBar?.id) {
             R.id.dialogBrushPickThickness -> {

@@ -19,11 +19,11 @@ import com.dididi.imageeditor.R
 class ToolsAdapter() : RecyclerView.Adapter<ToolsAdapter.ViewHolder>() {
 
     private val mToolsList = mutableListOf(
-        ToolsItem("Brush", R.drawable.ic_brush, ToolsType.BRUSH.ordinal),
+        ToolsItem("Brush", R.drawable.brush, ToolsType.BRUSH.ordinal),
         ToolsItem("Text", R.drawable.ic_text, ToolsType.TEXT.ordinal),
-        ToolsItem("Eraser", R.drawable.ic_eraser, ToolsType.ERASER.ordinal),
-        ToolsItem("Filter", R.drawable.ic_photo_filter, ToolsType.FILTER.ordinal),
-        ToolsItem("Emoji", R.drawable.ic_insert_emoticon, ToolsType.EMOJI.ordinal)
+        ToolsItem("Eraser", R.drawable.eraser, ToolsType.ERASER.ordinal),
+        ToolsItem("Emoji", R.drawable.emoji, ToolsType.EMOJI.ordinal),
+        ToolsItem("Clip", R.drawable.clip, ToolsType.CLIP.ordinal)
     )
 
     var itemClickListener: ((ToolsType) -> Unit)? = null

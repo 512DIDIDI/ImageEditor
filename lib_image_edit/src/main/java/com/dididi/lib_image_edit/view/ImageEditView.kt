@@ -1,33 +1,28 @@
 package com.dididi.lib_image_edit.view
 
-import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
 import android.graphics.PointF
 import android.util.AttributeSet
-import android.util.Log
-import android.view.MotionEvent
-import android.view.ScaleGestureDetector
-import android.view.View
 import android.view.ViewGroup
 import android.widget.RelativeLayout
-import android.widget.Toast
 import com.dididi.lib_image_edit.R
 import com.dididi.lib_image_edit.const.ImageFilter
 import com.dididi.lib_image_edit.event.MultiTouchListener
-import kotlin.math.max
-import kotlin.math.min
 
 
 /**
  * @author dididi(yechao)
  * @since 29/06/2020
  * @describe 图片编辑控件，
- * 组合 [BackgroundImageView] [BrushDrawingView] [ImageFilterView]
+ * 组合 [BackgroundImageView] [BrushDrawingView] [FilterView]
  */
 
-@Suppress("MemberVisibilityCanBePrivate")
-class ImageEditView : RelativeLayout {
+class ImageEditView(context: Context, private val attrs: AttributeSet?, defStyleAttr: Int) :
+    RelativeLayout(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
 
     companion object {
         //布局id
@@ -37,43 +32,23 @@ class ImageEditView : RelativeLayout {
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context,
-        attrs,
-        defStyleAttr
-    ) {
-        initView(attrs)
-    }
 
     /**背景图片*/
-    internal lateinit var backgroundImageView: BackgroundImageView
+    internal var backgroundImageView: BackgroundImageView
         private set
 
     /**画笔*/
-    internal lateinit var brushDrawingView: BrushDrawingView
+    internal var brushDrawingView: BrushDrawingView
         private set
 
     /**图片滤镜*/
-    internal lateinit var imageFilterView: ImageFilterView
+    internal var filterView: FilterView
         private set
 
-    /**初始位置*/
-    private var mLocationPoint: PointF? = null
+    /**位置 提供给属性动画的*/
+    private var position: PointF = PointF(0f, 0f)
 
-    /**位移量*/
-    private var mTranslatePoint = PointF()
-
-    /**是否正在执行缩放操作*/
-    private var isScaling = false
-
-    /**
-     * 平移或缩放时获取到焦点的控件
-     * [onTouchEvent]
-     */
-    private var focusView: View = this
-
-    @SuppressLint("ClickableViewAccessibility")
-    private fun initView(attrs: AttributeSet?) {
+    init {
         //1.初始化背景图片并添加
         backgroundImageView = BackgroundImageView(context).apply {
             id = BACKGROUND_IMAGE_ID
@@ -109,28 +84,25 @@ class ImageEditView : RelativeLayout {
             addView(this, viewParams)
         }
         //3.增加滤镜
-        imageFilterView = ImageFilterView(context).apply {
+        filterView = FilterView(context).apply {
             visibility = GONE
             //同步滤镜与背景图片的bitmap
             backgroundImageView.onImageChangeListener = fun(it) {
-                imageFilterView.setFilterEffect(ImageFilter.ORIGIN)
-                imageFilterView.setSourceBitmap(it)
+                setFilterEffect(ImageFilter.ORIGIN)
+                setSourceBitmap(it)
             }
             addView(this, viewParams)
         }
+        //4.touch事件
         setOnTouchListener(MultiTouchListener(context))
     }
 
-    override fun dispatchDraw(canvas: Canvas?) {
-        //裁剪画布到背景图大小，可以避免涂鸦时画出背景外的bug
-        backgroundImageView.getBitmap()?.let {
-            canvas?.clipRect(
-                (width - it.width) / 2f,
-                (height - it.height) / 2f,
-                (width + it.width) / 2f,
-                (height + it.height) / 2f
-            )
-        }
-        super.dispatchDraw(canvas)
+    fun setPosition(position: PointF) {
+        this.position = position
+        val l = position.x.toInt()
+        val t = position.y.toInt()
+        layout(l, t, l + width, t + height)
     }
+
+    fun getPosition() = position
 }

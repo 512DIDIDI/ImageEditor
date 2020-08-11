@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
+import com.dididi.lib_image_edit.view.OutlineTextView
 import kotlin.math.max
 import kotlin.math.min
 
@@ -17,6 +18,11 @@ import kotlin.math.min
  */
 
 class MultiTouchListener(val context:Context) :View.OnTouchListener{
+
+    companion object{
+        internal var minScale = 0.1f
+        internal var maxScale = 5f
+    }
 
     /**初始位置*/
     private var mLocationPoint: PointF? = null
@@ -36,12 +42,12 @@ class MultiTouchListener(val context:Context) :View.OnTouchListener{
         override fun onScale(view:View,scaleGestureDetector: ScaleGestureDetector): Boolean {
             mScaleFactor *= scaleGestureDetector.scaleFactor
             //限定缩放倍数的范围
-            mScaleFactor = max(0.1f, min(mScaleFactor, 5f))
+            mScaleFactor = max(minScale, min(mScaleFactor, maxScale))
             when {
-                mScaleFactor <= 0.1f -> {
+                mScaleFactor <= minScale -> {
                     Toast.makeText(context, "已经最小了", Toast.LENGTH_SHORT).show()
                 }
-                mScaleFactor >= 5f -> {
+                mScaleFactor >= maxScale -> {
 
                     Toast.makeText(context, "已经最大了", Toast.LENGTH_SHORT).show()
                 }
@@ -93,7 +99,7 @@ class MultiTouchListener(val context:Context) :View.OnTouchListener{
                 //因为手指抬起会重新计算focusView的真实位置，所以需要将位移记录清零
                 mTranslatePoint = PointF()
                 v?.apply {
-                    //手指抬起时，因为focusView有平移，所以需要重新计算focusView的位置
+                    //因为translation变换，实际view的位置并不会发生变化还是在原位置，因此，需重新计算view的left top等
                     left += translationX.toInt()
                     right += translationX.toInt()
                     top += translationY.toInt()

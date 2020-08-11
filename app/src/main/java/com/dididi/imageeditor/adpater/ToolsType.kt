@@ -11,6 +11,6 @@ enum class ToolsType {
     BRUSH,
     TEXT,
     ERASER,
-    FILTER,
+    CLIP,
     EMOJI
 }

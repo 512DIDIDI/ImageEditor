@@ -15,24 +15,17 @@ import com.dididi.lib_image_edit.R
  * @describe 带有轮廓的文本框
  */
 
-class OutlineTextView : AppCompatTextView {
-    constructor(context: Context) : this(context, null)
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+class OutlineTextView(context: Context, private val attrs: AttributeSet?, defStyleAttr: Int) :
+    AppCompatTextView(
         context,
         attrs,
         defStyleAttr
     ) {
-        initView(attrs)
-    }
 
-    var fillColor = Color.TRANSPARENT
-        set(value) {
-            field = value
-            fillPaint.color = value
-        }
+    constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
-    private fun initView(attrs: AttributeSet?) {
+    init {
         attrs?.apply {
             //获取属性的背景色
             val typedArray = context.obtainStyledAttributes(this, R.styleable.OutlineTextView)
@@ -42,6 +35,20 @@ class OutlineTextView : AppCompatTextView {
         }
     }
 
+    /**填充颜色*/
+    var fillColor = Color.TRANSPARENT
+        set(value) {
+            field = value
+            fillPaint.color = value
+        }
+
+    var isOutlineVisible = true
+        set(value) {
+            field = value
+            invalidate()
+        }
+
+    /**轮廓画笔*/
     private val pathPaint = Paint().apply {
         style = Paint.Style.STROKE
         strokeWidth = 4f
@@ -49,6 +56,7 @@ class OutlineTextView : AppCompatTextView {
         setARGB(120, 255, 255, 255)
     }
 
+    /**填充画笔*/
     private val fillPaint = Paint().apply {
         style = Paint.Style.FILL
         color = fillColor
@@ -56,7 +64,7 @@ class OutlineTextView : AppCompatTextView {
 
     override fun onDraw(canvas: Canvas?) {
         canvas?.also {
-            if (isFocusable){
+            if (isOutlineVisible){
                 //画轮廓
                 it.drawRoundRect(
                     5f,

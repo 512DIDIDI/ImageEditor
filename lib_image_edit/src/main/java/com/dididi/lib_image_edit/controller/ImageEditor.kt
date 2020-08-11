@@ -1,15 +1,19 @@
 package com.dididi.lib_image_edit.controller
 
+import android.animation.ObjectAnimator
+import android.animation.PointFEvaluator
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.PointF
 import android.view.View
+import android.view.animation.OvershootInterpolator
 import android.widget.RelativeLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.RequiresPermission
 import com.dididi.lib_image_edit.config.SaveSetting
 import com.dididi.lib_image_edit.event.MultiTouchListener
-import com.dididi.lib_image_edit.ext.getBitmap
+import com.dididi.lib_image_edit.util.getBitmap
 import com.dididi.lib_image_edit.view.BrushDrawingView
 import com.dididi.lib_image_edit.view.ImageEditView
 import com.dididi.lib_image_edit.view.OutlineTextView
@@ -86,6 +90,9 @@ class ImageEditor private constructor(private val builder: Builder) :
 
     /**
      * 保存文件
+     * @param filePath 文件路径
+     * @param finish   文件写入完成回调
+     * @param saveSetting 文件配置信息 [SaveSetting]
      */
     @RequiresPermission(allOf = [android.Manifest.permission.WRITE_EXTERNAL_STORAGE])
     fun saveAsFile(
@@ -93,18 +100,44 @@ class ImageEditor private constructor(private val builder: Builder) :
         finish:(Bitmap) -> Unit,
         saveSetting: SaveSetting = SaveSetting.Builder().build()
     ) {
-        val file = File(filePath)
-        if (!file.exists()){
-            file.createNewFile()
-        }
         mainScope.launch {
-            withContext(Dispatchers.IO){
+            withContext(Dispatchers.IO) {
+                //根据配置信息将view转换为图片
+                val file = File(filePath)
+                if (!file.exists()) {
+                    file.createNewFile()
+                }
                 file.outputStream().use {
-                    mParentView.getBitmap().compress(saveSetting.compressFormat,saveSetting.compressQuality,it)
+                    mParentView.getBitmap()
+                        .compress(saveSetting.compressFormat, saveSetting.compressQuality, it)
                 }
             }
             finish(mParentView.getBitmap())
         }
+    }
+
+    /**
+     * 设置图片/文字/表情的缩放范围
+     */
+    fun setScaleRange(min: Float, max: Float) {
+        MultiTouchListener.minScale = min
+        MultiTouchListener.maxScale = max
+    }
+
+    /**
+     * 重新将图片位移到中心位置，重置位置
+     */
+    fun resetPosition(){
+        ObjectAnimator.ofObject(
+            mParentView,
+            "position",
+            PointFEvaluator(),
+            PointF(mParentView.left.toFloat(),mParentView.top.toFloat()),
+            PointF(0f,0f)
+        ).apply {
+            duration = 200
+            interpolator = OvershootInterpolator(1.5f)
+        }.start()
     }
 
     //region add view api
@@ -162,7 +195,6 @@ class ImageEditor private constructor(private val builder: Builder) :
      * 撤销上一步操作
      */
     fun undo(): Boolean {
-        exitPaintMode()
         if (mAddViews.isNotEmpty()) {
             val removeView = mAddViews[mAddViews.size - 1]
             //判断当前要撤销的是否是画笔
@@ -183,7 +215,6 @@ class ImageEditor private constructor(private val builder: Builder) :
      * 从[mRedoViews]中读取记录，再添加到[mAddViews]中保存记录
      */
     fun redo(): Boolean {
-        exitPaintMode()
         if (mRedoViews.isNotEmpty()) {
             val redoView = mRedoViews[mRedoViews.size - 1]
             if (redoView is BrushDrawingView) {

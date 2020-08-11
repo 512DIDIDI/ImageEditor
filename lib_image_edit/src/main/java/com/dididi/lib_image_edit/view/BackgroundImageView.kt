@@ -20,14 +20,15 @@ import androidx.appcompat.widget.AppCompatImageView
  * @describe 背景图片
  */
 
-class BackgroundImageView : AppCompatImageView {
-    constructor(context: Context) : this(context, null)
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
+class BackgroundImageView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
+    AppCompatImageView(
         context,
         attrs,
         defStyleAttr
-    )
+    ) {
+
+    constructor(context: Context) : this(context, null)
+    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     var onImageChangeListener: ((Bitmap?) -> Unit)? = null
 
